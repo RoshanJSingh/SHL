@@ -27,6 +27,9 @@ async def lifespan(app: FastAPI):
     app.state.catalog = catalog
     app.state.retriever = retriever
     app.state.agent = AssessmentAgent(catalog, retriever, settings)
+    LOGGER.info("Startup: catalog_items=%d", len(retriever.catalog))
+    LOGGER.info("Startup: retrieval_backend=tfidf_word_char_ngrams")
+    LOGGER.info("Startup: llm_enabled=%s provider=%s", settings.use_llm and settings.has_llm_key, settings.llm_provider or "none")
     LOGGER.info("Application startup complete")
     yield
 

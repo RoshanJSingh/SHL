@@ -89,7 +89,7 @@ curl -X POST http://localhost:8000/chat \
 ```bash
 pytest -q
 python scripts/run_eval.py
-python scripts/smoke_test_api.py
+BASE_URL=http://localhost:8000 python scripts/smoke_test_api.py
 python scripts/make_approach_pdf.py
 ```
 
@@ -104,6 +104,11 @@ Evaluation saves `data/evaluation/results.json` and reports schema compliance, c
 3. Set `APP_ENV=production`.
 4. Set `GEMINI_API_KEY` as a Render secret. `render.yaml` already sets `USE_LLM=true`, `LLM_PROVIDER=gemini`, and `MODEL_NAME=gemini-2.5-flash`.
 5. Start command: `uvicorn app.main:app --host 0.0.0.0 --port $PORT`.
+6. After deploy, run:
+
+```bash
+BASE_URL=https://your-render-service.onrender.com python scripts/smoke_test_api.py
+```
 
 ### Railway / Fly / Hugging Face Spaces
 
@@ -112,6 +117,19 @@ Use the Dockerfile. Set `PORT` if the platform does not inject it automatically.
 ## Cold Start
 
 Cold start is usually a few seconds: loading about 377 catalog records and building TF-IDF matrices in memory. Optional sentence-transformers is not enabled by default to keep startup predictable.
+
+## Final Submission Checklist
+
+- Public base URL: your deployed Render/Railway/Fly/Spaces URL, for example `https://your-render-service.onrender.com`
+- Health endpoint: `GET <base-url>/health`
+- Chat endpoint: `POST <base-url>/chat`
+- Cold-start delay: yes on free Render; expected to be a few seconds after idle
+- LLM name: `Gemini 2.5 Flash`
+- LLM provider env: `LLM_PROVIDER=gemini`, `MODEL_NAME=gemini-2.5-flash`, `USE_LLM=true`
+- Required secret: `GEMINI_API_KEY`
+- AI tools used: `Codex`
+- Approach PDF: `docs/approach.pdf`
+- Verification command: `BASE_URL=<public-base-url> python scripts/smoke_test_api.py`
 
 ## Known Limitations
 
