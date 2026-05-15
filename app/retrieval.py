@@ -73,6 +73,14 @@ TYPE_KEYWORDS = {
 
 ASSESSMENT_FAMILIES = ["opq", "verify", "g+", "gsa", "mq", "ceb", "shl", "java", "python", "excel"]
 
+PREFERRED_COMPARISON_MATCHES = {
+    "opq": "occupational personality questionnaire opq32r",
+    "gsa": "global skills assessment",
+    "g+": "shl verify interactive g+",
+}
+
+AMBIGUOUS_COMPARISON_TERMS = {"verify", "java", "excel", "sql", "opq report"}
+
 
 @dataclass(frozen=True)
 class ScoredAssessment:
@@ -447,6 +455,15 @@ class CatalogRetriever:
                     )
                 )
         if exact:
+            preferred = PREFERRED_COMPARISON_MATCHES.get(normalized)
+            if preferred:
+                exact.sort(
+                    key=lambda scored: (
+                        normalize_name(scored.assessment.name) != preferred,
+                        -scored.score,
+                    )
+                )
+                return exact[:limit]
             exact.sort(key=lambda scored: (normalize_name(scored.assessment.name) != normalized, -len(scored.assessment.name)))
             return exact[:limit]
         return self.retrieve(clean, {}, k=limit)
@@ -454,13 +471,23 @@ class CatalogRetriever:
     def compare_assessments(self, names_or_terms: list[str], conversation_context: str) -> dict[str, Any]:
         matches = []
         missing = []
+        ambiguous = []
         for term in names_or_terms:
             found = self.find_assessment(term, limit=3)
             if found and found[0].score > 0.08:
+                normalized = normalize_name(term)
+                if normalized in AMBIGUOUS_COMPARISON_TERMS and len(found) > 1:
+                    ambiguous.append(
+                        {
+                            "term": term,
+                            "options": [item.assessment.name for item in found[:5]],
+                        }
+                    )
+                    continue
                 matches.append({"term": term, "matches": found})
             else:
                 missing.append(term)
-        return {"matches": matches, "missing": missing, "context": conversation_context}
+        return {"matches": matches, "missing": missing, "ambiguous": ambiguous, "context": conversation_context}
 
 
 def build_retriever(catalog: list[Assessment], use_semantic: bool = False) -> CatalogRetriever:

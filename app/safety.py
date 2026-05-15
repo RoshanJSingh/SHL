@@ -7,12 +7,17 @@ import re
 
 PROMPT_INJECTION_PATTERNS = [
     r"\bignore (all )?(previous|prior|above|system|developer) instructions\b",
+    r"\bignore (all )?(above|previous|prior)\b",
+    r"\bdisregard (previous|prior|above|system|developer)\s*(directions|instructions)?\b",
     r"\breveal (the )?(system|developer) (prompt|message|instructions)\b",
     r"\bshow (the )?(system|developer) (prompt|message|instructions)\b",
+    r"\btell me (your|the) (hidden )?(instructions|prompt)\b",
+    r"\bhidden instructions\b",
     r"\bjailbreak\b",
     r"\bdeveloper message\b",
     r"\bsystem prompt\b",
     r"\bact as (?:dan|an unrestricted|a different|a fake)\b",
+    r"\byou are now\b",
     r"\breturn assessments? not in (the )?catalog\b",
     r"\bmake up (fake )?(urls?|assessments?|tests?)\b",
     r"\bfake shl (tests?|assessments?|urls?)\b",
@@ -22,8 +27,12 @@ OFF_TOPIC_PATTERNS = [
     r"\blegal advice\b",
     r"\bemployment law\b",
     r"\bhow (can|should) i reject\b",
+    r"\bshould i reject\b",
+    r"\breject (this|the) candidate\b",
     r"\breject(?:ing)? a candidate\b",
     r"\bfire (an employee|someone)\b",
+    r"\bgeneral hiring lawyer\b",
+    r"\bhiring lawyer\b",
     r"\bsalary\b",
     r"\bcompensation\b",
     r"\bprotected class\b",
@@ -92,8 +101,12 @@ def detect_off_topic(text: str) -> bool:
             "employment law",
             "rejecting a candidate",
             "reject a candidate",
+            "reject this candidate",
+            "reject the candidate",
+            "should i reject",
             "who should i hire",
             "should i hire",
+            "hiring lawyer",
         ]
     )
     return strong_off_topic or not has_scope_term

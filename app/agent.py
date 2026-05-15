@@ -202,8 +202,12 @@ def parse_conversation(messages: list[Message], catalog: list[Assessment]) -> Co
         ]
     )
     state.confidence = min(1.0, signal_count / 3)
-    latest_words = len(re.findall(r"\w+", latest))
-    state.is_vague = signal_count == 0 and latest_words <= 8 and not state.wants_comparison
+    vague_uncertainty = bool(
+        re.search(r"\b(not sure|unsure|something|whatever|any assessment|some assessment)\b", latest, re.IGNORECASE)
+    )
+    state.is_vague = (signal_count == 0 and not state.wants_comparison) or (
+        signal_count <= 1 and vague_uncertainty and not state.wants_comparison
+    )
     state.constraints = {
         "role_title": state.role_title,
         "roles": extract_roles(full_user_context),
@@ -327,6 +331,17 @@ def _comparison_value(item: Assessment, key: str) -> str:
 def _fallback_comparison_reply(compare_obj: dict[str, Any]) -> str:
     matches = compare_obj["matches"]
     missing = compare_obj["missing"]
+    ambiguous = compare_obj.get("ambiguous", [])
+    if ambiguous:
+        lines = [
+            "I need a more specific catalog assessment to make a grounded comparison. "
+            "These terms match multiple SHL catalog records:"
+        ]
+        for item in ambiguous:
+            options = ", ".join(item["options"][:5])
+            lines.append(f"- {item['term']}: {options}")
+        lines.append("Which exact assessment should I compare?")
+        return "\n".join(lines)
     if len(matches) < 2:
         available = []
         for match in matches:
@@ -368,6 +383,39 @@ def _llm_evidence(scored: list[ScoredAssessment]) -> list[dict[str, Any]]:
         }
         for item in scored[:10]
     ]
+
+
+def _guard_llm_reply(reply: str | None, scored: list[ScoredAssessment]) -> str | None:
+    """Reject LLM prose that introduces unsupported factual claims."""
+
+    if not reply:
+        return None
+    text = reply.strip()
+    lowered = text.lower()
+    if not text or "http://" in lowered or "https://" in lowered:
+        return None
+    if any(marker in lowered for marker in ["fake assessment", "fake url", "not in the catalog"]):
+        return None
+
+    evidence_parts: list[str] = []
+    for scored_item in scored[:10]:
+        item = scored_item.assessment
+        evidence_parts.extend([item.description, item.raw_text])
+        evidence_parts.extend(str(value) for value in item.metadata.values())
+    joined_evidence = " ".join(evidence_parts).lower()
+
+    allowed_minutes = {
+        match.group(1)
+        for match in re.finditer(r"\b(\d{1,3})\s*(?:minutes?|mins?)\b", joined_evidence)
+    }
+    for match in re.finditer(r"\b(\d{1,3})\s*(?:minutes?|mins?)\b", lowered):
+        if match.group(1) not in allowed_minutes:
+            return None
+
+    for sensitive in ["remote testing", "adaptive", "irt"]:
+        if sensitive in lowered and sensitive not in joined_evidence:
+            return None
+    return text
 
 
 def _validate_final_response(response: ChatResponse, catalog: list[Assessment]) -> ChatResponse:
@@ -453,8 +501,9 @@ class AssessmentAgent:
             user_context=_conversation_summary(state, messages),
             evidence=_llm_evidence(scored),
         )
+        guarded_llm_reply = _guard_llm_reply(llm_reply, scored)
         response = ChatResponse(
-            reply=llm_reply or deterministic_reply,
+            reply=guarded_llm_reply or deterministic_reply,
             recommendations=recommendations,
             end_of_conversation=True,
         )

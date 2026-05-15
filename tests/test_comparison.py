@@ -10,3 +10,11 @@ def test_compare_opq_and_gsa_is_grounded_and_not_recommendation(client):
     assert "gsa" in reply or "global skills assessment" in reply
     assert "catalog" in reply
     assert "not available" in reply or "test type" in reply
+
+
+def test_ambiguous_comparison_asks_for_specific_catalog_assessment(client):
+    data = post_chat(client, [{"role": "user", "content": "What is the difference between Verify and OPQ?"}])
+    assert data["recommendations"] == []
+    assert data["end_of_conversation"] is False
+    reply = data["reply"].lower()
+    assert "multiple" in reply or "which exact" in reply or "more specific" in reply

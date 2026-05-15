@@ -99,7 +99,7 @@ class LLMClient:
         api_key = self.settings.gemini_api_key
         if not api_key:
             return None
-        model = self.settings.model_name or "gemini-1.5-flash"
+        model = self.settings.model_name or "gemini-2.5-flash"
         url = (
             f"https://generativelanguage.googleapis.com/v1beta/models/"
             f"{model}:generateContent?key={api_key}"

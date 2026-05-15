@@ -43,7 +43,7 @@ pip install -r requirements.txt
 - `CATALOG_PATH`: defaults to `data/catalog.json`
 - `USE_LLM`: defaults to true only when a supported key exists, otherwise false
 - `LLM_PROVIDER`: `openai`, `gemini`, `groq`, or `openrouter`
-- `MODEL_NAME`: optional model override
+- `MODEL_NAME`: optional model override; Render defaults to `gemini-2.5-flash`
 - `OPENAI_API_KEY`, `GEMINI_API_KEY`, `GROQ_API_KEY`, `OPENROUTER_API_KEY`: optional
 - `OPENAI_BASE_URL`: optional OpenAI-compatible endpoint
 - `PORT`: defaults to `8000`
@@ -102,7 +102,7 @@ Evaluation saves `data/evaluation/results.json` and reports schema compliance, c
 1. Push this repository to GitHub.
 2. Create a Render Web Service from the repo, or use `render.yaml`.
 3. Set `APP_ENV=production`.
-4. Optional: set `USE_LLM=true`, `LLM_PROVIDER`, `MODEL_NAME`, and the provider API key.
+4. Set `GEMINI_API_KEY` as a Render secret. `render.yaml` already sets `USE_LLM=true`, `LLM_PROVIDER=gemini`, and `MODEL_NAME=gemini-2.5-flash`.
 5. Start command: `uvicorn app.main:app --host 0.0.0.0 --port $PORT`.
 
 ### Railway / Fly / Hugging Face Spaces

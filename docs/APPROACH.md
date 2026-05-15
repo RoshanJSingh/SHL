@@ -34,5 +34,5 @@
 ## How Improvement Was Measured
 - Baseline keyword retrieval was compared with hybrid lexical retrieval plus rule boosts on Java, Python, sales, contact center, graduate, leadership, OPQ, and Excel cases.
 - Current metrics are written to `data/evaluation/results.json`: Recall@10, catalog validity, schema compliance, behavior pass rate, relevance, and groundedness.
-- LLM used: configurable through `LLM_PROVIDER` and `MODEL_NAME` such as GPT-4o-mini, Gemini, Groq Llama, or OpenRouter models.
+- LLM used: configurable through `LLM_PROVIDER` and `MODEL_NAME`; deployment defaults to Gemini 2.5 Flash when `GEMINI_API_KEY` is set.
 - AI tools used: Codex for implementation assistance, with catalog checks, tests, and evaluation used as review gates.
