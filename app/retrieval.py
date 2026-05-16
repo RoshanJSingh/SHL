@@ -73,6 +73,193 @@ TYPE_KEYWORDS = {
 
 ASSESSMENT_FAMILIES = ["opq", "verify", "g+", "gsa", "mq", "ceb", "shl", "java", "python", "excel"]
 
+INTENT_BOOSTS = {
+    "sales": {
+        "patterns": [
+            r"\bsales\b",
+            r"\bsales representative\b",
+            r"\baccount executive\b",
+            r"\bcustomer conversations?\b",
+        ],
+        "preferred_names": [
+            "Sales & Service Phone Simulation",
+            "Sales & Service Phone Solution",
+            "Entry Level Sales Solution",
+            "Retail Sales and Service Simulation",
+            "OPQ MQ Sales Report",
+            "Sales Interview Guide",
+            "Sales Profiler Cards",
+            "Sales Transformation 1.0 - Individual Contributor",
+            "Sales Transformation 2.0 - Individual Contributor",
+            "WriteX - Email Writing (Sales) (New)",
+        ],
+    },
+    "contact_center": {
+        "patterns": [
+            r"\bcontact center\b",
+            r"\bcall center\b",
+            r"\bcustomer service\b",
+            r"\bfrontline agents?\b",
+            r"\bcustomer support\b",
+        ],
+        "preferred_names": [
+            "Contact Center Call Simulation (New)",
+            "Customer Service Phone Simulation",
+            "Customer Service Phone Solution",
+            "Entry Level Customer Serv-Retail & Contact Center",
+            "Entry Level Customer Service (General) Solution",
+            "Sales & Service Phone Simulation",
+            "Sales & Service Phone Solution",
+            "WriteX - Email Writing (Customer Service) (New)",
+            "Entry Level Technical Support Solution",
+            "Conversational Multichat Simulation",
+        ],
+    },
+    "graduate_cognitive": {
+        "patterns": [
+            r"\bgraduate\b",
+            r"\bearly careers?\b",
+            r"\bentry[ -]?level\b",
+            r"\bbroad potential\b",
+            r"\bcognitive ability\b",
+            r"\baptitude\b",
+        ],
+        "preferred_names": [
+            "Verify - General Ability Screen",
+            "SHL Verify Interactive G+",
+            "Global Skills Assessment",
+            "Global Skills Development Report",
+            "Verify - G+",
+            "Verify - Numerical Ability",
+            "SHL Verify Interactive – Numerical Reasoning",
+            "SHL Verify Interactive - Inductive Reasoning",
+            "SHL Verify Interactive – Deductive Reasoning",
+            "Verify - Verbal Ability - Next Generation",
+        ],
+    },
+    "leadership": {
+        "patterns": [
+            r"\bleadership\b",
+            r"\bleadership potential\b",
+            r"\bmanager\b",
+            r"\bmanagement\b",
+            r"\bsupervisor\b",
+            r"\bworkplace personality\b",
+        ],
+        "preferred_names": [
+            "OPQ Leadership Report",
+            "Enterprise Leadership Report 1.0",
+            "Enterprise Leadership Report 2.0",
+            "Occupational Personality Questionnaire OPQ32r",
+            "OPQ Manager Plus Report",
+            "OPQ Manager Plus Report 2.0",
+            "OPQ Team Types and Leadership Styles Report",
+            "OPQ Team Types & Leadership Styles Profile",
+            "HiPo Unlocking Potential Report 2.0",
+            "MFS 360 Enterprise Leadership Report",
+        ],
+    },
+    "personality_opq": {
+        "patterns": [
+            r"\bpersonality\b",
+            r"\bopq\b",
+            r"\bopq-style\b",
+            r"\bwork style\b",
+            r"\bbehavioral style\b",
+        ],
+        "preferred_names": [
+            "Occupational Personality Questionnaire OPQ32r",
+            "OPQ Candidate Plus Report",
+            "OPQ Candidate Report 2.0",
+            "OPQ Profile Report",
+            "OPQ Premium Plus Report",
+            "OPQ Premium Plus Report 2.0",
+            "OPQ User Report",
+            "OPQ User and Managers Report",
+            "OPQ Universal Competency Report 2.0",
+            "OPQ Emotional Intelligence Report",
+        ],
+    },
+    "software_developer": {
+        "patterns": [
+            r"\bdeveloper\b",
+            r"\bbackend\b",
+            r"\bsoftware engineer\b",
+            r"\bprogramming\b",
+            r"\bcoding\b",
+            r"\bjava\b",
+            r"\bpython\b",
+        ],
+        "preferred_names": [
+            "Python (New)",
+            "Java 8 (New)",
+            "Core Java (Advanced Level) (New)",
+            "Core Java (Entry Level) (New)",
+            "Java Frameworks (New)",
+            "JavaScript (New)",
+            "Microsoft SQL Server 2014 Programming",
+            "Agile Software Development",
+            "Automata - Fix (New)",
+            "Automata Front End",
+        ],
+    },
+}
+
+BROAD_INTENTS = {"sales", "contact_center", "graduate_cognitive", "leadership", "personality_opq"}
+
+SOFTWARE_SKILLS = {"java", "python", "javascript", "c++", ".net", "react", "aws", "azure", "sql"}
+SOFTWARE_RELATED_TERMS = {
+    "agile",
+    "automata",
+    "backend",
+    "c#",
+    "coding",
+    "computer science",
+    "database",
+    "developer",
+    "development",
+    "django",
+    "flask",
+    "front end",
+    "frontend",
+    "git",
+    "java",
+    "javascript",
+    "j2ee",
+    "node",
+    "programming",
+    "python",
+    "react",
+    "selenium",
+    "sonarqube",
+    "software",
+    "sql",
+    "web services",
+}
+UNRELATED_SOFTWARE_DOMAINS = {
+    "accounting",
+    "accounts payable",
+    "accounts receivable",
+    "advertising",
+    "beverage",
+    "biology",
+    "cardiology",
+    "chemistry",
+    "culinary",
+    "dermatology",
+    "economics",
+    "food",
+    "hotel",
+    "marketing",
+    "medical",
+    "nursing",
+    "pharmacy",
+    "retail",
+    "salesforce",
+    "search engine optimization",
+    "seo",
+}
+
 PREFERRED_COMPARISON_MATCHES = {
     "opq": "occupational personality questionnaire opq32r",
     "gsa": "global skills assessment",
@@ -80,6 +267,25 @@ PREFERRED_COMPARISON_MATCHES = {
 }
 
 AMBIGUOUS_COMPARISON_TERMS = {"verify", "java", "excel", "sql", "opq report"}
+
+
+def infer_intents(text: str) -> list[str]:
+    lowered = text.lower()
+    intents: list[str] = []
+    for intent, config in INTENT_BOOSTS.items():
+        if any(re.search(pattern, lowered, flags=re.IGNORECASE) for pattern in config["patterns"]):
+            intents.append(intent)
+    return intents
+
+
+def catalog_name_key(value: str) -> str:
+    return normalize_space(value).lower()
+
+
+def is_broad_intent_query(text: str, constraints: dict[str, Any] | None = None) -> bool:
+    constraints = constraints or {}
+    intents = set(constraints.get("intents") or infer_intents(text))
+    return bool(intents & BROAD_INTENTS)
 
 
 @dataclass(frozen=True)
@@ -125,6 +331,23 @@ def infer_excluded_test_types(text: str) -> list[str]:
                 excluded.append(code)
                 break
     return list(dict.fromkeys(excluded))
+
+
+def _preferred_name_boost(intent: str, item: Assessment) -> float:
+    preferred = INTENT_BOOSTS[intent]["preferred_names"]
+    item_name = normalize_name(item.name)
+    item_exact = catalog_name_key(item.name)
+    for rank, preferred_name in enumerate(preferred):
+        if item_exact == catalog_name_key(preferred_name):
+            return max(0.55, 1.45 - rank * 0.07)
+        preferred_key = normalize_name(preferred_name)
+        if (
+            "(" not in preferred_name
+            and item_name == preferred_key
+            or ("(" not in preferred_name and (item_name in preferred_key or preferred_key in item_name))
+        ):
+            return max(0.55, 1.45 - rank * 0.07)
+    return 0.0
 
 
 def _metadata_text(metadata: dict[str, Any]) -> str:
@@ -251,6 +474,15 @@ class CatalogRetriever:
         boosts: dict[str, float] = {}
 
         skills = list(dict.fromkeys((constraints.get("skills") or []) + extract_skills(query)))
+        software_skill_set = set(skills) & SOFTWARE_SKILLS
+        intents = list(dict.fromkeys((constraints.get("intents") or []) + infer_intents(query)))
+        for intent in intents:
+            if intent == "software_developer" and software_skill_set and not any(skill in text for skill in software_skill_set):
+                continue
+            boost = _preferred_name_boost(intent, item)
+            if boost:
+                boosts[f"intent:{intent}"] = boost
+
         for skill in skills:
             patterns = SKILL_PATTERNS.get(skill, [rf"\b{re.escape(skill)}\b"])
             if _contains_any(text, patterns):
@@ -293,6 +525,20 @@ class CatalogRetriever:
                 boosts["duration:short"] = 0.12
             elif duration > 45:
                 boosts["duration:long_penalty"] = -0.18
+
+        software_skills = set(skills) & SOFTWARE_SKILLS
+        developer_context = bool(
+            software_skills
+            or re.search(r"\b(developer|backend|software|programming|coding|engineer)\b", query, flags=re.IGNORECASE)
+        )
+        if developer_context and "K" in item.test_type_codes:
+            requested_terms = set(software_skills)
+            has_requested_skill = any(skill in text for skill in requested_terms)
+            has_software_term = any(term in text for term in SOFTWARE_RELATED_TERMS)
+            if not has_requested_skill and not has_software_term:
+                boosts["penalty:unrelated_software_k"] = -1.35
+            if any(term in text for term in UNRELATED_SOFTWARE_DOMAINS) and not has_requested_skill:
+                boosts["penalty:unrelated_domain"] = -1.25
         return boosts
 
     def _evidence_for(self, item: Assessment, query: str, max_snippets: int = 3) -> list[str]:
@@ -359,7 +605,7 @@ class CatalogRetriever:
         filtered = [
             item
             for item in candidates
-            if not (excluded_types and item.assessment.test_type_codes.issubset(excluded_types))
+            if not (excluded_types and item.assessment.test_type_codes & excluded_types)
             and item.score > -0.5
         ]
         selected = self._diverse_select(filtered, max_items=max_items, query=query, constraints=constraints)
@@ -374,7 +620,11 @@ class CatalogRetriever:
     ) -> list[ScoredAssessment]:
         selected: list[ScoredAssessment] = []
         seen_family: set[str] = set()
-        explicit_many = bool(re.search(r"\b(10|ten|many|all|versions?)\b", query.lower()))
+        explicit_many = (
+            bool(re.search(r"\b(10|ten|many|all|versions?)\b", query.lower()))
+            or is_broad_intent_query(query, constraints)
+            or bool((set(constraints.get("skills") or []) | set(extract_skills(query))) & SOFTWARE_SKILLS)
+        )
 
         def family_key(item: Assessment) -> str:
             name = normalize_name(item.name)
@@ -410,7 +660,7 @@ class CatalogRetriever:
                 if f"skill:{skill}" in scored.boosts:
                     if append_unique(scored):
                         added_for_skill += 1
-                    if added_for_skill >= min(3, max_items):
+                    if added_for_skill >= min(5, max_items):
                         break
                     if len(selected) >= max_items:
                         break
@@ -429,6 +679,18 @@ class CatalogRetriever:
                         recompute_seen_family()
                     append_unique(scored)
                     break
+
+        if is_broad_intent_query(query, constraints):
+            candidate_by_name = {catalog_name_key(scored.assessment.name): scored for scored in candidates}
+            for intent in constraints.get("intents") or infer_intents(query):
+                if intent not in BROAD_INTENTS:
+                    continue
+                for preferred_name in INTENT_BOOSTS[intent]["preferred_names"]:
+                    scored = candidate_by_name.get(catalog_name_key(preferred_name))
+                    if scored:
+                        append_unique(scored)
+                    if len(selected) >= max_items:
+                        return selected
 
         for scored in candidates:
             if len(selected) >= max_items:

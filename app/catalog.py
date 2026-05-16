@@ -41,6 +41,12 @@ def normalize_name(value: str) -> str:
     return normalize_space(value)
 
 
+def dedupe_name_key(value: str) -> str:
+    value = normalize_space(value).lower()
+    value = re.sub(r"[^a-z0-9+#.]+", " ", value)
+    return normalize_space(value)
+
+
 def canonical_url(url: str) -> str:
     parsed = urlparse(url)
     scheme = "https"
@@ -198,7 +204,7 @@ def load_catalog(path: str | Path, allow_emergency: bool = True) -> list[Assessm
         if assessment is None:
             continue
         key_url = canonical_url(assessment.url)
-        key_name = normalize_name(assessment.name)
+        key_name = dedupe_name_key(assessment.name)
         if key_url in seen_urls or key_name in seen_names:
             continue
         seen_urls.add(key_url)

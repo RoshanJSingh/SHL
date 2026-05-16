@@ -14,8 +14,10 @@ from app.retrieval import (
     ScoredAssessment,
     extract_roles,
     extract_skills,
+    infer_intents,
     infer_desired_test_types,
     infer_excluded_test_types,
+    is_broad_intent_query,
 )
 from app.safety import detect_off_topic, detect_prompt_injection, refusal_reply_for
 from app.schemas import ChatResponse, Message, RecommendationItem
@@ -105,11 +107,11 @@ def _extract_role_title(text: str) -> str | None:
     return None
 
 
-def _extract_count(text: str) -> int:
+def _extract_count(text: str) -> int | None:
     match = re.search(r"\b(?:top|best)?\s*(10|[1-9])\b", text.lower())
     if match:
         return max(1, min(int(match.group(1)), 10))
-    return 5
+    return None
 
 
 def _looks_like_job_description(text: str) -> bool:
@@ -208,10 +210,12 @@ def parse_conversation(messages: list[Message], catalog: list[Assessment]) -> Co
     state.is_vague = (signal_count == 0 and not state.wants_comparison) or (
         signal_count <= 1 and vague_uncertainty and not state.wants_comparison
     )
+    intents = infer_intents(full_user_context)
     state.constraints = {
         "role_title": state.role_title,
         "roles": extract_roles(full_user_context),
         "skills": state.skills,
+        "intents": intents,
         "seniority": state.seniority,
         "desired_test_types": state.desired_test_types,
         "excluded_test_types": state.excluded_test_types,
@@ -482,7 +486,8 @@ class AssessmentAgent:
             )
 
         query = _build_query(state, messages)
-        max_items = int(state.constraints.get("max_items") or 5)
+        requested_items = state.constraints.get("max_items")
+        max_items = int(requested_items) if requested_items else (10 if is_broad_intent_query(query, state.constraints) else 5)
         scored = self.retriever.recommend(query, state.constraints, max_items=max_items)
         recommendations = _recommendation_items(scored, self.catalog)
         if not recommendations:

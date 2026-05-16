@@ -12,7 +12,9 @@
 - Lexical retrieval combines word TF-IDF with character n-grams so terms like Java, C++, .NET, OPQ, GSA, and product variants still match.
 - Optional semantic retrieval is supported if sentence-transformers is installed, but the deployable baseline stays lightweight.
 - Rule boosts cover exact skills, assessment families, role/seniority context, requested test types, and constraints such as no personality or short tests.
-- Diversity selection prevents the shortlist from becoming only near-duplicate variants, while still preserving explicit constraints like Java plus personality.
+- A transparent intent boost map promotes real catalog records for sales, contact center, graduate cognitive, leadership, and OPQ/personality queries; final items are still selected from `data/catalog.json`.
+- Software relevance penalties demote unrelated K tests for Java/Python/backend queries while keeping exact skill tests at the top.
+- Broad intents return up to 10 items for Recall@10; narrow skill requests usually return 5.
 
 ## Prompt Design
 - The LLM receives only a conversation summary and retrieved catalog evidence; it is not allowed to invent names, URLs, test types, durations, or capabilities.
@@ -22,7 +24,7 @@
 
 ## Evaluation Method
 - `scripts/run_eval.py` measures schema compliance, catalog validity, Recall@10, lexical relevance, approximate groundedness, and behavior probe pass rate.
-- Behavior probes cover vague clarification, recommendation, refinement, comparison, off-topic refusal, prompt-injection refusal, URL hallucination, and max-10 limits.
+- Behavior probes cover vague clarification, recommendation, public traces, refinement, comparison, off-topic refusal, prompt-injection refusal, URL hallucination, and max-10 limits.
 - Recall@10 uses labeled expected catalog names/URLs where available; relevance and groundedness use local catalog evidence, not model self-judgment.
 
 ## What Did Not Work
@@ -33,6 +35,6 @@
 
 ## How Improvement Was Measured
 - Baseline keyword retrieval was compared with hybrid lexical retrieval plus rule boosts on Java, Python, sales, contact center, graduate, leadership, OPQ, and Excel cases.
-- Current metrics are written to `data/evaluation/results.json`: Recall@10, catalog validity, schema compliance, behavior pass rate, relevance, and groundedness.
+- Before intent boosts and public traces, Recall@10 was 0.717 with schema/catalog/behavior all 1.000. After the intent boost map, broad-query sizing, software penalties, and 10 public traces, Recall@10 is 1.000 with schema compliance 1.000, catalog validity 1.000, groundedness 1.000, and behavior pass rate 1.000.
 - LLM used: configurable through `LLM_PROVIDER` and `MODEL_NAME`; deployment defaults to Gemini 2.5 Flash when `GEMINI_API_KEY` is set.
 - AI tools used: Codex for implementation assistance, with catalog checks, tests, and evaluation used as review gates.

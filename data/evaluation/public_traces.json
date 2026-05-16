@@ -1,1 +1,113 @@
-[]
+[
+  {
+    "id": "public_sales_customer_conversations",
+    "behavior": "recommend",
+    "messages": [
+      {"role": "user", "content": "I need assessments for a sales representative who spends most of the day on customer calls and service conversations."}
+    ],
+    "expected_names": [
+      "Sales & Service Phone Simulation",
+      "Sales & Service Phone Solution",
+      "Entry Level Sales Solution"
+    ]
+  },
+  {
+    "id": "public_contact_center_frontline",
+    "behavior": "recommend",
+    "messages": [
+      {"role": "user", "content": "Recommend tests for frontline contact center agents doing customer support."}
+    ],
+    "expected_names": [
+      "Contact Center Call Simulation (New)",
+      "Customer Service Phone Simulation",
+      "Customer Service Phone Solution"
+    ]
+  },
+  {
+    "id": "public_graduate_cognitive",
+    "behavior": "recommend",
+    "messages": [
+      {"role": "user", "content": "For graduate hiring, I want broad potential and cognitive ability assessments."}
+    ],
+    "expected_names": [
+      "Verify - General Ability Screen",
+      "SHL Verify Interactive G+",
+      "Global Skills Assessment"
+    ]
+  },
+  {
+    "id": "public_manager_leadership_personality",
+    "behavior": "recommend",
+    "messages": [
+      {"role": "user", "content": "We are assessing managers for leadership potential and workplace personality."}
+    ],
+    "expected_names": [
+      "OPQ Leadership Report",
+      "Enterprise Leadership Report 1.0",
+      "Occupational Personality Questionnaire OPQ32r"
+    ]
+  },
+  {
+    "id": "public_opq_personality",
+    "behavior": "recommend",
+    "messages": [
+      {"role": "user", "content": "Show OPQ-style personality assessments only."}
+    ],
+    "expected_names": [
+      "Occupational Personality Questionnaire OPQ32r",
+      "OPQ Candidate Plus Report",
+      "OPQ Profile Report"
+    ]
+  },
+  {
+    "id": "public_python_backend",
+    "behavior": "recommend",
+    "messages": [
+      {"role": "user", "content": "Need Python tests for a backend developer."}
+    ],
+    "expected_names": [
+      "Python (New)"
+    ]
+  },
+  {
+    "id": "public_java_midlevel",
+    "behavior": "recommend",
+    "messages": [
+      {"role": "user", "content": "Hiring a mid-level Java developer."}
+    ],
+    "expected_names": [
+      "Java 8 (New)",
+      "Core Java (Advanced Level) (New)",
+      "Java Frameworks (New)"
+    ]
+  },
+  {
+    "id": "public_refine_add_personality",
+    "behavior": "refine",
+    "messages": [
+      {"role": "user", "content": "Hiring a mid-level Java developer."},
+      {"role": "assistant", "content": "1. Java 8 (New)\n2. Java Frameworks (New)"},
+      {"role": "user", "content": "Actually add personality tests too."}
+    ],
+    "expected_names": [
+      "Java 8 (New)",
+      "OPQ Candidate Plus Report"
+    ]
+  },
+  {
+    "id": "public_compare_opq_gsa",
+    "behavior": "compare",
+    "messages": [
+      {"role": "user", "content": "Compare OPQ and GSA."}
+    ],
+    "expected_names": []
+  },
+  {
+    "id": "public_vague_clarify",
+    "behavior": "clarify",
+    "messages": [
+      {"role": "user", "content": "Can you recommend an assessment?"}
+    ],
+    "expected_names": []
+  }
+]
